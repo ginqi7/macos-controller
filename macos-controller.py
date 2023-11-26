@@ -3,8 +3,7 @@
 
 from AppKit import NSWorkspace,NSApplicationActivateIgnoringOtherApps 
 import sys
-import pyautogui
-import subprocess
+import pynput
 from sexpdata import loads, dumps
 
 def get_actived_app():    
@@ -29,13 +28,17 @@ def kill_app(app_name):
             app.terminate()
             break
 
-def paste_text():
-    # pyautogui.keyDown('command') 
-    # pyautogui.keyDown('v')
-    # pyautogui.keyUp('v') 
-    # pyautogui.keyUp('command')
-    pyautogui.write('Hello world!') 
+def mouse_position():
+    mouse = pynput.mouse.Controller()
+    print(dumps(mouse.position))
 
+def paste():
+    keyboard = pynput.keyboard.Controller()
+    print("fuck")
+    keyboard.press('i')
+    keyboard.release('i')
+
+    
 def main():
     arguments = sys.argv
     func_name = arguments[1]
@@ -47,6 +50,10 @@ def main():
         list_all_running_apps()
     elif func_name == "kill_app":
         kill_app(arguments[2])
+    elif func_name == "mouse_position":
+        mouse_position()
+    elif func_name == "paste":
+        paste()
         
 if __name__ == "__main__":
     main()

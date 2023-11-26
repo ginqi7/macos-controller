@@ -79,5 +79,11 @@
   "Kill running app by NAME."
   (macc--run-command (list "kill_app" name)))
 
+(defun macc-mouse-position ()
+  "Get mouse position."
+  (let ((mouse-position
+         (read (macc--run-command (list "mouse_position")))))
+    (cons (car mouse-position) (nth 1 mouse-position))))
+
 (provide 'macos-controller)
 ;;; macos-controller.el ends here
