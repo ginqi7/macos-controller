@@ -36,31 +36,35 @@
 
 ;;; Code:
 
+
+(require 'websocket-bridge)
+
 (defvar macc--last-actived-app nil)
 
-(defcustom macc-py-executor "python"
-  "Python executor."
-  :group 'macos-controller
-  :type '(string)
-  )
-
-(defvar macc-py-path
+(defvar macos-controller-py-path
   (concat
-   (file-name-directory
-    (if load-file-name load-file-name (buffer-file-name)))
+   (if load-file-name
+       (file-name-directory load-file-name)
+     (file-name-directory (buffer-file-name)))
    "macos-controller.py"))
 
-(defun macc--run-command (parameters)
-  "Run python program with PARAMETERS."
-  (string-trim
-   (shell-command-to-string
-    (string-join
-     (append (list macc-py-executor macc-py-path) parameters)
-     " "))))
+(defun macos-controller-start ()
+  "Start websocket bridge real-time-translation."
+  (interactive)
+  (websocket-bridge-app-start "macos-controller" (executable-find "python3") macos-controller-py-path))
+
+(defun macos-controller-restart ()
+  "Restart websocket bridge real-time-translation and show process."
+  (interactive)
+  (websocket-bridge-app-exit "macos-controller")
+  (macos-controller-start)
+  (websocket-bridge-app-open-buffer "macos-controller"))
+
 
 (defun macc-get-actived-app ()
   "Get actived app name."
-  (setq macc--last-actived-app (macc--run-command '("get_actived_app"))))
+  (websocket-bridge-call "macos-controller" "get_actived_app"))
+
 
 (defun macc-app-switch-to-last-actived-app ()
   "Swith to last actived app."
@@ -69,11 +73,23 @@
 
 (defun macc-app-switch-to (app-name)
   "Swith to APP-NAME."
-  (macc--run-command (list "switch_to" app-name)))
+  (websocket-bridge-call "macos-controller" "switch_to" app-name))
 
 (defun macc-list-all-running-apps ()
   "List all running apps."
-  (read (macc--run-command (list "list_all_running_apps"))))
+  (websocket-bridge-call "macos-controller" "list_all_running_apps"))
+
+(defun macc-paste ()
+  "Paste."
+  (websocket-bridge-call "macos-controller" "paste"))
+
+(defun macc-press (key)
+  "Press KEY."
+  (websocket-bridge-call "macos-controller" "press" key))
+
+(defun macc-command-tab ()
+  "Press KEY."
+  (websocket-bridge-call "macos-controller" "command_tab"))
 
 (defun macc-kill-app (name)
   "Kill running app by NAME."
