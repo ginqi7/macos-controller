@@ -36,7 +36,6 @@
 
 ;;; Code:
 
-
 (require 'websocket-bridge)
 
 (defvar macc--last-actived-app nil)
@@ -60,11 +59,9 @@
   (macos-controller-start)
   (websocket-bridge-app-open-buffer "macos-controller"))
 
-
 (defun macc-get-actived-app ()
   "Get actived app name."
   (websocket-bridge-call "macos-controller" "get_actived_app"))
-
 
 (defun macc-app-switch-to-last-actived-app ()
   "Swith to last actived app."
@@ -86,6 +83,10 @@
 (defun macc-press (key)
   "Press KEY."
   (websocket-bridge-call "macos-controller" "press" key))
+
+(defun macc-type (str)
+  "Press STR."
+  (websocket-bridge-call "macos-controller" "type" str))
 
 (defun macc-command-tab ()
   "Press KEY."

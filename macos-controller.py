@@ -8,6 +8,11 @@ import websocket_bridge_python
 from AppKit import NSApplicationActivateIgnoringOtherApps, NSWorkspace
 from sexpdata import dumps
 
+async def update_emacs_string_variable(name, value):
+    """
+    Update emacs string type variable by name and value.
+    """
+    await run_and_log(f'(setq {name} "{value}")')
 
 def actived_app_name():
     """
@@ -20,38 +25,30 @@ def actived_app_name():
 def find_app_by_name (name):
     """
     Find running app by name.
-    
+
     Parameters:
     name: string, the name of target app.
-    
+
     Returns:
     matched app.
-    """   
+    """
     for app in all_running_apps():
         if app.localizedName() == name:
             return app
 
-
-async def update_emacs_string_variable(name, value):    
-    """
-    Update emacs string type variable by name and value.
-    """
-    await run_and_log(f'(setq {name} "{value}")')
-    
-def switch_to(app_name):    
+def switch_to(app_name):
     """
     Switch to the App by app_name.
     """
     find_app_by_name(app_name).activateWithOptions_(NSApplicationActivateIgnoringOtherApps)
-    
-        
+
 def all_running_apps ():
     """
     Get all running apps.
-    
+
     Returns:
     A arrays store the information of all apps.
-    
+
     """
     return NSWorkspace.sharedWorkspace().runningApplications()
 
@@ -65,7 +62,7 @@ def list_all_running_apps():
 def kill_app(app_name):
     """
     Kill app by app_name.
-    """    
+    """
     find_app_by_name(app_name).terminate()
 
 def mouse_position():
@@ -74,8 +71,7 @@ def mouse_position():
     """
     mouse = pynput.mouse.Controller()
     print(dumps(mouse.position))
-    
-    
+
 def press_with_modify_key(modified_key, key):
     """
     Press key bind modified_key and key.
@@ -92,14 +88,20 @@ def paste():
     Paste.
     """
     press_with_modify_key(pynput.keyboard.Key.cmd, "v")
-    
-        
+
 def command_tab():
     """
     Press command + tab.
     """
     press_with_modify_key(pynput.keyboard.Key.cmd, pynput.keyboard.Key.tab)
-        
+
+def type(str):
+    """
+    Press the key.
+    """
+    keyboard = pynput.keyboard.Controller()
+    keyboard.type(str)
+
 def press(key):
     """
     Press the key.
@@ -109,7 +111,6 @@ def press(key):
         key = pynput.keyboard.Key[key]
     keyboard.press(key)
     keyboard.release(key)
-    
 
 async def run_and_log(cmd):
     """
@@ -125,7 +126,7 @@ async def main():
 
 async def init():
     print("init")
-    
+
 async def get_emacs_var(var_name: str):
     """
     Get Emacs variable and format it.
@@ -145,15 +146,18 @@ async def on_message(message):
         if cmd == "get_actived_app":
             await update_emacs_string_variable("macc--last-actived-app", actived_app_name())
         elif cmd == "list_all_running_apps":
-            list_all_running_apps()        
+            list_all_running_apps()
         elif cmd == "switch_to":
             app_name = info[1][1].strip()
-            switch_to(app_name)        
+            switch_to(app_name)
         elif cmd == "paste":
             paste();
         elif cmd == "press":
             key = info[1][1].strip()
             press(key);
+        elif cmd == "type":
+            key = info[1][1].strip()
+            type(key);
         elif cmd == "command_tab":
             command_tab();
         else:
